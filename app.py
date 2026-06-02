@@ -50,10 +50,12 @@ uploaded_file = st.file_uploader("Upload a bird photo", type=["jpg", "jpeg", "pn
 
 if uploaded_file:
     img = Image.open(uploaded_file).convert('RGB')
-    st.image(img, use_column_width=True)
+    st.image(img, width=700)
     inputs = preprocess(img).unsqueeze(0)
     with torch.no_grad():
         outputs = model(inputs)
-        _, pred = torch.max(outputs, 1)
+        probabilities = torch.nn.functional.softmax(outputs, dim=1)
+        confidence, pred = torch.max(probabilities, 1)
         idx = pred.item()
-    st.success(f"The model identifies this as: **{bird_labels[idx]}**")
+        confidence_score = confidence.item() * 100
+    st.success(f"The model identifies this as: **{bird_labels[idx]}** (confidence: {confidence_score:.2f}%)")

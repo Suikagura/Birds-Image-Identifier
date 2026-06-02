@@ -7,21 +7,9 @@ import os
 st.set_page_config(page_title="Ohio Bird ID", page_icon="🐦")
 st.title("🐦 Bird Species Identifier")
 
-# Load the actual class names from the dataset file
-@st.cache_data
-def get_classes():
-    classes_file = '/content/cub_dataset/CUB_200_2011/classes.txt'
-    if os.path.exists(classes_file):
-        with open(classes_file, 'r') as f:
-            # File format is "1 001.Black_footed_Albatross"
-            lines = f.readlines()
-            # Extract the name, remove the index prefix, and replace underscores
-            names = [line.split(' ')[1].strip().split('.')[-1].replace('_', ' ') for line in lines]
-            return names
-    else:
-        return [f"Species {i}" for i in range(200)]
-
-classes = get_classes()
+# Note: For deployment, ensure you upload a 'classes.txt' or hardcode the list
+# For now, we use a placeholder list of 200 species
+classes = [f"Species {i}" for i in range(200)] 
 
 @st.cache_resource
 def load_model():
@@ -48,6 +36,4 @@ if uploaded_file is not None:
     with torch.no_grad():
         outputs = model(inputs)
         _, pred = torch.max(outputs, 1)
-    
-    bird_name = classes[pred.item()]
-    st.success(f"Prediction: **{bird_name}**")
+    st.success(f"Prediction: {classes[pred.item()]}")
